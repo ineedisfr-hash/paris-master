@@ -2,8 +2,10 @@
 // Les axes se dessinent de bout en bout et leurs croisements apparaissent dans l'ordre.
 // Un palier découvert doit être validé par un contrôle (80 %) avant d'ouvrir le suivant ;
 // au-delà du plafond de nouveautés du jour, l'application conseille de réviser.
-import { item, levelById } from "../data.js";
+import { item, levelById, CATS } from "../data.js";
 import { createMap, GL_OK } from "../map.js";
+import { create3D } from "../map3d.js";
+import { orientHTML, wireOrient } from "../orient.js";
 import { ficheHTML } from "../fiche.js";
 import { seqMarks } from "../questions.js";
 import * as store from "../store.js";
@@ -30,7 +32,10 @@ export default function learn(root, params, [levelId]) {
 
   root.innerHTML = `
   <section class="play learn">
-    <div class="play-map"><div id="lmap"></div></div>
+    <div class="play-map"><div id="lmap"></div><div id="lmap3d" hidden></div>
+      ${GL_OK ? `<button class="btn small d3-btn learn-3d" aria-pressed="false" title="Vue 3D">3D</button>` : ""}
+      ${orientHTML({ compass: false })}
+    </div>
     <div class="play-panel">
       <div class="play-top">
         <a class="icon-btn" href="#/niveaux#n${level.id}" aria-label="Retour">✕</a>
@@ -50,6 +55,52 @@ export default function learn(root, params, [levelId]) {
   const m = createMap($("#lmap"), { labels: true, arrNumbers: true, police: store.S.settings.police, photos: true });
   m.refresh();
 
+  // ------------------------------------------------------------ vue 3D (même contenu que la carte 2D)
+  const D3KEY = "pm-learn-3d";
+  let m3 = null;
+  let view = null; // { ids, focus, marks } : ce que montre la carte en ce moment
+  let redraw2d = null;
+  const pref3d = () => { try { return localStorage.getItem(D3KEY) === "1"; } catch { return false; } };
+  function apply3d() {
+    if (!m3 || !view) return;
+    m3.setFilter({ cats: Object.keys(CATS), arr: null, ids: view.ids });
+    m3.select(view.focus || null);
+    if (view.marks?.length) m3.marks(view.marks, { stagger: 120 });
+    else m3.clearMarks();
+    if (view.focus) m3.fly(view.focus);
+    else m3.fitItems(view.ids.map(item));
+  }
+  async function set3D(on) {
+    try { localStorage.setItem(D3KEY, on ? "1" : "0"); } catch { /* stockage indisponible */ }
+    const b = $(".learn-3d");
+    b?.classList.toggle("on", on);
+    b?.setAttribute("aria-pressed", String(on));
+    $("#lmap").hidden = on;
+    $("#lmap3d").hidden = !on;
+    $(".play-map .orient").hidden = !on;
+    if (on && !m3) {
+      m3 = create3D($("#lmap3d"), {
+        labels: true,
+        onItemClick: (x) => { const j = ids.indexOf(x.id); if (j >= 0 && j < limit()) { i = j; show(); } },
+      });
+      try {
+        await m3.ready;
+      } catch {
+        toast("Vue 3D indisponible (fond de carte injoignable)");
+        m3?.destroy(); m3 = null;
+        return set3D(false);
+      }
+      apply3d();
+    } else if (!on && m3) {
+      m3.destroy();
+      m3 = null;
+      m.refresh();
+      redraw2d?.();
+    }
+  }
+  $(".learn-3d")?.addEventListener("click", () => set3D(!m3));
+  const unOrient = wireOrient($(".play-map"), () => m3);
+
   function renderPaliers(cur) {
     const passed = store.paliersPassed(level);
     $(".paliers").innerHTML = Array.from({ length: nP }, (_, k) => {
@@ -60,10 +111,19 @@ export default function learn(root, params, [levelId]) {
 
   /** Dessine l'élément ; pour un axe ou un anneau, tracé animé puis croisements un à un. */
   function drawMap(it) {
-    m.clear();
-    m.highlightArr(it.arr.length === 1 ? it.arr[0] : null);
     const marks = seqMarks(it);
     const isChain = marks.length >= 2;
+    // la carte 2D cachée pendant la 3D ne peut pas se cadrer : elle est redessinée au retour en 2D
+    redraw2d = () => draw2d(it, marks, isChain);
+    if (!m3) redraw2d();
+    const around = isChain ? [] : [...store.palierItems(level, palierOf(ids.indexOf(it.id))), ...it.links];
+    view = { ids: [...new Set([it.id, ...around])], focus: it, marks: isChain ? marks.map((x, k) => ({ ...x, n: k + 1 })) : null };
+    apply3d();
+  }
+
+  function draw2d(it, marks, isChain) {
+    m.clear();
+    m.highlightArr(it.arr.length === 1 ? it.arr[0] : null);
     if (!isChain) {
       // repères du palier en cours (et voisins immédiats pour une porte)
       const k = palierOf(ids.indexOf(it.id));
@@ -126,9 +186,14 @@ export default function learn(root, params, [levelId]) {
         <a class="btn primary" href="#/jouer/palier?niveau=${level.id}&palier=${k}&retour=${encodeURIComponent(`/apprendre/${level.id}`)}">Passer le contrôle du palier ${k + 1}</a>
       </div></div>`;
     root.querySelectorAll(".reread").forEach((b) => b.addEventListener("click", () => { i = ids.indexOf(b.dataset.id); show(); }));
-    m.clear();
-    for (const id of list) m.draw(item(id), { style: "normal", label: true });
-    m.fit(list.map(item), { pad: 40, maxZoom: 15 });
+    redraw2d = () => {
+      m.clear();
+      for (const id of list) m.draw(item(id), { style: "normal", label: true });
+      m.fit(list.map(item), { pad: 40, maxZoom: 15 });
+    };
+    if (!m3) redraw2d();
+    view = { ids: list, focus: null };
+    apply3d();
   }
 
   function showEnd() {
@@ -141,9 +206,14 @@ export default function learn(root, params, [levelId]) {
         <a class="btn" href="#/jouer/${level.ring ? "portes" : "axes"}?niveau=${level.id}">${level.ring ? "Les portes dans l'ordre" : "Grands axes : dans l'ordre"}</a>
         <a class="btn" href="#/jouer/retrouve?niveau=${level.id}">Retrouver sur la carte</a>
       </div></div>`;
-    m.clear();
-    for (const x of ids) m.draw(item(x), { style: "normal", label: false });
-    m.fit(ids.map(item), { pad: 30 });
+    redraw2d = () => {
+      m.clear();
+      for (const x of ids) m.draw(item(x), { style: "normal", label: false });
+      m.fit(ids.map(item), { pad: 30 });
+    };
+    if (!m3) redraw2d();
+    view = { ids, focus: null };
+    apply3d();
   }
 
   $(".prev").addEventListener("click", () => { if (i > 0) { i--; show(); } });
@@ -177,5 +247,6 @@ export default function learn(root, params, [levelId]) {
   if (store.allPaliersPassed(level) && !params.get("item")) showEnd();
   else if (cur < nP && store.palierLearned(level, cur) && !params.get("item")) showGate(cur);
   else show();
-  return () => { document.removeEventListener("keydown", onKey); m.destroy(); };
+  if (GL_OK && pref3d()) set3D(true);
+  return () => { document.removeEventListener("keydown", onKey); unOrient(); m3?.destroy(); m.destroy(); };
 }

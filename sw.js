@@ -1,12 +1,12 @@
 // Service worker : application et données disponibles hors connexion ;
 // les tuiles de fond de carte déjà vues sont gardées en cache (limité).
-const VERSION = "pm-v5";
+const VERSION = "pm-v7";
 const SHELL = [
   "./", "index.html", "manifest.webmanifest", "css/app.css", "data/paris.json", "data/context.json", "data/police.json",
   "vendor/leaflet/leaflet.js", "vendor/leaflet/leaflet.css",
   "vendor/maplibre/maplibre-gl.js", "vendor/maplibre/maplibre-gl.css", "vendor/maplibre/leaflet-maplibre-gl.js", "icons/icon.svg",
   "js/main.js", "js/data.js", "js/util.js", "js/geo.js", "js/store.js", "js/map.js", "js/fiche.js",
-  "js/questions.js", "js/session.js", "js/fx.js", "js/map3d.js",
+  "js/questions.js", "js/session.js", "js/fx.js", "js/map3d.js", "js/orient.js",
   "js/views/dashboard.js", "js/views/explore.js", "js/views/levels.js", "js/views/learn.js",
   "js/views/play.js", "js/views/stats.js", "js/views/badges.js", "js/views/settings.js",
 ];

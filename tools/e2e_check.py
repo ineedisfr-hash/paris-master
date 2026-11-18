@@ -120,7 +120,7 @@ with sync_playwright() as p:
                 else:
                     back.click()
                     # retour : fiche suivante, ou écran « plafond du jour » (10 nouveautés déjà découvertes ici)
-                    page.wait_for_selector(".fiche, .pause", timeout=5000)
+                    page.wait_for_selector(".fiche, .pause", timeout=15000)
                     if page.locator(".pause").count():
                         shot(page, f"{name}_apprendre-plafond")
             # Préparation des jeux : tous les éléments des niveaux 0, 1 et des portes découverts, paliers validés
@@ -139,7 +139,8 @@ with sync_playwright() as p:
             page.wait_for_timeout(1500)
             shot(page, f"{name}_apprendre-porte")
             page.goto(URL + "#/carte?item=tour-eiffel")
-            page.wait_for_selector(".sheet:not([hidden]) figure.photo img", timeout=6000)
+            # délai large : la 3D est rendue sans carte graphique dans le navigateur de test
+            page.wait_for_selector(".sheet:not([hidden]) figure.photo img", timeout=15000)
             shot(page, f"{name}_carte-photo")
             if not page.locator(".ppin").count():
                 problems.append("commissariats absents de la carte")
@@ -148,7 +149,7 @@ with sync_playwright() as p:
             page.wait_for_timeout(500)
             page.fill(".search", "Boulevard Voltaire")
             page.press(".search", "Enter")
-            page.wait_for_selector(".sheet:not([hidden]) .fiche", timeout=5000)
+            page.wait_for_selector(".sheet:not([hidden]) .fiche", timeout=15000)
             shot(page, f"{name}_carte-fiche")
             page.locator(".sheet .close").click()
             # « Quelle est cette rue ? » en mode mémorisation : nom masqué puis révélé
@@ -156,7 +157,7 @@ with sync_playwright() as p:
             page.wait_for_timeout(300)
             box = page.locator("#emap").bounding_box()
             page.mouse.click(box["x"] + box["width"] * 0.5, box["y"] + box["height"] * 0.55)
-            page.wait_for_selector(".gpop", timeout=4000)
+            page.wait_for_selector(".gpop", timeout=15000)
             if page.locator(".gp-reveal").count():
                 if not page.locator(".gp-name.masked").count():
                     problems.append("nom de rue non masqué en mémorisation")
@@ -173,7 +174,7 @@ with sync_playwright() as p:
                 problems.append("3D : épingles manquantes")
             page.fill(".search", "Panthéon")
             page.press(".search", "Enter")
-            page.wait_for_selector(".sheet:not([hidden]) .orbit", timeout=5000)
+            page.wait_for_selector(".sheet:not([hidden]) .orbit", timeout=15000)
             page.locator(".sheet .orbit").click()
             page.wait_for_timeout(3000)
             shot(page, f"{name}_carte-3d-survol")

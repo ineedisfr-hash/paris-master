@@ -4,6 +4,7 @@
 import { DB, CATS, item } from "../data.js";
 import { createMap, GL_OK } from "../map.js";
 import { create3D } from "../map3d.js";
+import { orientHTML, wireOrient } from "../orient.js";
 import { ficheHTML } from "../fiche.js";
 import * as store from "../store.js";
 import { esc, toast, arrLabel, fmtDist } from "../util.js";
@@ -36,14 +37,8 @@ export default function explore(root, params) {
       <datalist id="ex-list">${DB.items.map((i) => `<option value="${esc(i.name)}">`).join("")}</datalist>
       <button class="btn small filters-btn" aria-expanded="false">Filtres</button>
     </div>
-    <p class="d3-hint" hidden>Deux doigts : faire pivoter et incliner · Ctrl + glisser à la souris</p>
-    <div class="orient" hidden role="toolbar" aria-label="Orientation de la carte">
-      <button class="o-btn rot-l" title="Tourner vers la gauche" aria-label="Tourner vers la gauche">⟲</button>
-      <button class="o-btn north" title="Nord en haut" aria-label="Nord en haut"><span class="needle">▲</span>N</button>
-      <button class="o-btn rot-r" title="Tourner vers la droite" aria-label="Tourner vers la droite">⟳</button>
-      <button class="o-btn flat" title="Vue à plat ou inclinée">À plat</button>
-      <button class="o-btn compass" title="Orienter selon le téléphone">Boussole</button>
-    </div>
+    <p class="d3-hint" hidden>Deux doigts : tourner et incliner la carte (ou les boutons en bas)</p>
+    ${orientHTML()}
     <div class="ex-filters" hidden>
       <label>Arrondissement
         <select class="arr-select"><option value="">Tout Paris</option>${DB.arrs.map((a) => `<option value="${a.n}" ${pref.arr === a.n ? "selected" : ""}>${a.label} — ${esc(a.name)}</option>`).join("")}</select>
@@ -76,7 +71,9 @@ export default function explore(root, params) {
     const order = (i) => (i.geom.polys.length && !i.isPlace ? 0 : i.geom.lines.length ? 1 : 2);
     for (const it of [...visible].sort((a, b) => order(a) - order(b))) {
       const isSel = selected && selected.id === it.id;
-      const showLabel = pref.learn && (isSel || z >= 14.5 || (pref.arr && z >= 13.5));
+      // les portes gardent un nom court même en vue d'ensemble, pour apprendre le tour de Paris
+      const full = isSel || z >= 14.5 || (pref.arr && z >= 13.5);
+      const showLabel = pref.learn && (full || (it.isPorte ? "short" : false));
       m.draw(it, { style: isSel ? "focus" : selected ? "muted" : "normal", label: showLabel, onClick: open });
     }
     if (selected && !visible.includes(selected)) m.draw(selected, { style: "focus", label: pref.learn, onClick: open });
@@ -201,21 +198,8 @@ export default function explore(root, params) {
   }
   $(".d3-btn")?.addEventListener("click", () => set3D(!pref.d3));
 
-  // orientation (vue 3D, qui peut aussi être mise à plat)
-  const needle = () => { const n = $(".orient .needle"); if (n && m3) n.style.transform = `rotate(${-m3.bearing}deg)`; };
-  $(".rot-l").addEventListener("click", () => { m3?.rotate(-45); setTimeout(needle, 450); });
-  $(".rot-r").addEventListener("click", () => { m3?.rotate(45); setTimeout(needle, 450); });
-  $(".north").addEventListener("click", () => { m3?.north(); setTimeout(needle, 550); });
-  $(".flat").addEventListener("click", (e) => { const flat = m3?.toggleFlat(); e.currentTarget.textContent = flat ? "Incliner" : "À plat"; });
-  $(".compass").addEventListener("click", async (e) => {
-    const b = e.currentTarget;
-    try {
-      const on = await m3?.setCompass(!m3.compass);
-      b.classList.toggle("on", !!on);
-      toast(on ? "La carte suit maintenant l'orientation du téléphone" : "Boussole désactivée");
-    } catch (err) { toast(err.message); }
-  });
-  const needleTimer = setInterval(needle, 700);
+  // orientation (vue 3D) : rotation, nord, inclinaison, boussole
+  const unOrient = wireOrient(root, () => m3);
 
   // ------------------------------------------------------------ commandes
   root.querySelectorAll(".seg button").forEach((b) => b.addEventListener("click", () => {
@@ -237,7 +221,7 @@ export default function explore(root, params) {
     savePref(pref);
     if (pref.arr) fitArr(pref.arr);
     else if (m3) m3.home();
-    else m.fitParis();
+    else m.fitParis({ inset: inset() });
     render();
   });
   $(".police-toggle").addEventListener("change", (e) => {
@@ -274,10 +258,11 @@ export default function explore(root, params) {
   });
 
   if (pref.arr) m.fitArr(pref.arr);
+  else m.fitParis({ inset: inset() });
   render();
   if (params.get("item") && item(params.get("item"))) open(item(params.get("item")), { fly: true });
   if (pref.d3) set3D(true);
-  return () => { clearInterval(needleTimer); m3?.destroy(); m.destroy(); };
+  return () => { unOrient(); m3?.destroy(); m.destroy(); };
 }
 
 export { arrLabel };

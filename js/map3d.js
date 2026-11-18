@@ -1,20 +1,21 @@
 // Vue 3D (MapLibre GL natif) : carte inclinable et orientable, bâtiments en relief
 // (hauteurs réelles OpenStreetMap), ciel, tracés et épingles des éléments, survol à 360°.
 import { DB, CATS, item } from "./data.js";
-import { loadStyle, labelLayerIds, pinSVG, arrColor, STYLE_COL, isTransitLayer, POLICE_COL, policeHTML } from "./map.js";
+import { loadStyle, labelLayerIds, pinSVG, arrColor, STYLE_COL, isTransitLayer, POLICE_COL, policeHTML, porteShort } from "./map.js";
 import { S } from "./store.js";
 import { esc } from "./util.js";
 
 const ml = () => window.maplibregl;
 const toLngLat = ([lat, lng]) => [lng, lat];
 const HOME = { center: [2.3430, 48.8590], zoom: 12.6, pitch: 55, bearing: -17 };
+const MAX_TILT = 75;
 
 let FC = null;
 function itemsGeoJSON() {
   if (FC) return FC;
   const features = [];
   for (const it of DB.items) {
-    const props = { id: it.id, cat: it.cat, name: it.name, color: (CATS[it.cat] || CATS.voie).color, arr: it.arr };
+    const props = { id: it.id, cat: it.cat, name: it.name, short: it.isPorte ? porteShort(it.name) : it.name, color: (CATS[it.cat] || CATS.voie).color, arr: it.arr };
     for (const l of it.geom.lines) features.push({ type: "Feature", properties: { ...props, kind: "line" }, geometry: { type: "LineString", coordinates: l.map(toLngLat) } });
     for (const p of it.geom.polys) features.push({ type: "Feature", properties: { ...props, kind: "poly" }, geometry: { type: "Polygon", coordinates: p.map((r) => r.map(toLngLat)) } });
     features.push({ type: "Feature", properties: { ...props, kind: "pt" }, geometry: { type: "Point", coordinates: toLngLat(it.point) } });
@@ -51,7 +52,7 @@ export function create3D(el, { labels = true, onItemClick = null, onMapClick = n
     for (const l of s.layers) if (labelLayerIds(base).includes(l.id) && (!showLabels || (isTransitLayer(l.id) && !S.settings.transit))) (l.layout ||= {}).visibility = "none";
 
     map = new (ml().Map)({
-      container: el, style: s, ...HOME, maxPitch: 75, minZoom: 10.5, maxZoom: 19,
+      container: el, style: s, ...HOME, maxPitch: MAX_TILT, minZoom: 10.5, maxZoom: 19,
       maxBounds: [[2.10, 48.75], [2.60, 48.97]], attributionControl: false, fadeDuration: 0,
     });
     map.addControl(new (ml().NavigationControl)({ visualizePitch: true, showCompass: true }), "top-right");
@@ -77,6 +78,10 @@ export function create3D(el, { labels = true, onItemClick = null, onMapClick = n
       map.addLayer({ id: "pm-arr-num", type: "symbol", source: "pm-arrpts", maxzoom: 14, layout: { "text-field": ["get", "label"], "text-font": ["Noto Sans Bold"], "text-size": 15 }, paint: { "text-color": ["get", "color"], "text-halo-color": "#fff", "text-halo-width": 2 } });
       map.addLayer({ id: "pm-label", type: "symbol", source: "pm-items", filter: ["==", ["get", "kind"], "pt"], minzoom: 13.5,
         layout: { "text-field": ["get", "name"], "text-font": ["Noto Sans Bold"], "text-size": 13, "text-offset": [0, 0.9], "text-anchor": "top", "text-optional": true, visibility: showLabels ? "visible" : "none" },
+        paint: { "text-color": "#202124", "text-halo-color": "#fff", "text-halo-width": 2 } });
+      // portes : nom court en vue d'ensemble (les collisions sont gérées par MapLibre)
+      map.addLayer({ id: "pm-porte-label", type: "symbol", source: "pm-items", filter: ["all", ["==", ["get", "kind"], "pt"], ["==", ["get", "cat"], "porte"]], maxzoom: 13.5,
+        layout: { "text-field": ["get", "short"], "text-font": ["Noto Sans Bold"], "text-size": 12, "text-variable-anchor": ["top", "left", "right", "bottom"], "text-radial-offset": 0.8, "text-optional": true, visibility: showLabels ? "visible" : "none" },
         paint: { "text-color": "#202124", "text-halo-color": "#fff", "text-halo-width": 2 } });
 
       for (const it of DB.items) {
@@ -106,6 +111,7 @@ export function create3D(el, { labels = true, onItemClick = null, onMapClick = n
       map.on("click", (e) => { if (!e.defaultPrevented && Date.now() - lastItemClick > 350) onMapClick?.({ lat: e.lngLat.lat, lng: e.lngLat.lng }, e.lngLat); });
       // toute interaction de l'utilisateur interrompt un survol en cours
       for (const ev of ["mousedown", "touchstart", "wheel"]) map.on(ev, () => { orbiting = false; });
+      map.on("moveend", declutterMarks);
       applyFilter();
       el.querySelector(".maplibregl-ctrl-attrib")?.classList.remove("maplibregl-compact-show");
       resolve(map);
@@ -113,6 +119,19 @@ export function create3D(el, { labels = true, onItemClick = null, onMapClick = n
   });
 
   let orbiting = false;
+  const seqMarkers = [];
+  // comme en 2D : une pastille qui en chevauche une autre ne garde que son numéro (le tracé reste visible)
+  function declutterMarks() {
+    if (destroyed || !seqMarkers.length) return;
+    const spans = seqMarkers.map((x) => x.getElement().querySelector("span")).filter(Boolean);
+    spans.forEach((sp) => sp.classList.remove("tight"));
+    const kept = [];
+    for (const sp of spans) {
+      const r = sp.getBoundingClientRect();
+      if (kept.some((k) => !(r.right < k.left - 2 || r.left > k.right + 2 || r.bottom < k.top - 1 || r.top > k.bottom + 1))) sp.classList.add("tight");
+      else kept.push(r);
+    }
+  }
   const policeMarkers = [];
   function drawPolice(on) {
     policeMarkers.forEach((m) => m.remove());
@@ -162,13 +181,15 @@ export function create3D(el, { labels = true, onItemClick = null, onMapClick = n
     if (!map?.getLayer("pm-line")) return;
     const cat = ["in", ["get", "cat"], ["literal", filt.cats]];
     const arr = filt.arr ? ["in", filt.arr, ["get", "arr"]] : true;
-    const f = (kind) => ["all", ["==", ["get", "kind"], kind], cat, arr];
+    const only = filt.ids ? ["in", ["get", "id"], ["literal", filt.ids]] : true;
+    const f = (kind) => ["all", ["==", ["get", "kind"], kind], cat, arr, only];
     for (const id of ["pm-case", "pm-line", "pm-hit"]) map.setFilter(id, f("line"));
     for (const id of ["pm-poly", "pm-poly-line"]) map.setFilter(id, f("poly"));
     map.setFilter("pm-label", f("pt"));
+    map.setFilter("pm-porte-label", ["all", f("pt"), ["==", ["get", "cat"], "porte"]]);
     map.setFilter("pm-arr-sel", ["==", ["get", "n"], filt.arr ?? -1]);
     for (const { it, node } of markers) {
-      const vis = filt.cats.includes(it.cat) && (!filt.arr || it.arr.includes(filt.arr));
+      const vis = filt.cats.includes(it.cat) && (!filt.arr || it.arr.includes(filt.arr)) && (!filt.ids || filt.ids.includes(it.id));
       node.style.display = vis || (selected && selected.id === it.id) ? "" : "none";
     }
   }
@@ -181,6 +202,7 @@ export function create3D(el, { labels = true, onItemClick = null, onMapClick = n
       if (!map || !style) return;
       for (const id of labelLayerIds(style)) if (map.getLayer(id)) map.setLayoutProperty(id, "visibility", on && !(isTransitLayer(id) && !S.settings.transit) ? "visible" : "none");
       map.setLayoutProperty("pm-label", "visibility", on ? "visible" : "none");
+      map.setLayoutProperty("pm-porte-label", "visibility", on ? "visible" : "none");
     },
     setFilter(f) {
       filt = { ...filt, ...f };
@@ -204,8 +226,40 @@ export function create3D(el, { labels = true, onItemClick = null, onMapClick = n
       const padding = { top: 60 + (inset.top || 0), bottom: 40 + (inset.bottom || 0), left: 40, right: 40 + (inset.right || 0) };
       const bounds = [[Math.min(...lng), Math.min(...lat)], [Math.max(...lng), Math.max(...lat)]];
       const cam = map.cameraForBounds(bounds, { padding, maxZoom: it.geom.lines.length ? 16.2 : 16.8 });
-      map.flyTo({ ...cam, pitch: 58, bearing: map.getBearing(), duration: 1600, essential: true });
+      // l'inclinaison choisie par l'utilisateur est conservée d'un élément à l'autre
+      map.flyTo({ ...cam, pitch: map.getPitch(), bearing: map.getBearing(), duration: 1600, essential: true });
     },
+    /** Cadre plusieurs éléments en gardant l'inclinaison et l'orientation. */
+    fitItems(items, { maxZoom = 15.5 } = {}) {
+      if (!map || !items.length) return;
+      orbiting = false;
+      const pts = items.flatMap((it) => [it.point, ...it.geom.lines.flat(), ...it.geom.polys.flat(2)]).map(toLngLat);
+      const lng = pts.map((p) => p[0]), lat = pts.map((p) => p[1]);
+      const cam = map.cameraForBounds([[Math.min(...lng), Math.min(...lat)], [Math.max(...lng), Math.max(...lat)]], { padding: 40, maxZoom });
+      if (cam) map.flyTo({ ...cam, pitch: map.getPitch(), bearing: map.getBearing(), duration: 1400, essential: true });
+    },
+    /** Pastilles numérotées d'une suite de croisements : [{ at, label, n }]. */
+    marks(list, { stagger = 0 } = {}) {
+      api.clearMarks();
+      if (!map) return;
+      list.forEach((m, i) => {
+        const node = document.createElement("div");
+        node.className = `seqm seqm3d seqm-${m.style || "hint"}`;
+        node.innerHTML = `<span style="--d:${i * stagger}ms">${m.n ? `<b>${m.n}</b>` : ""}<em>${esc(m.label)}</em></span>`;
+        // en relief, les noms couvriraient le tracé : numéro seul, le nom s'affiche au toucher
+        node.title = m.label;
+        node.addEventListener("click", (e) => {
+          e.stopPropagation();
+          lastItemClick = Date.now();
+          const was = node.classList.contains("open");
+          seqMarkers.forEach((x) => x.getElement().classList.remove("open"));
+          node.classList.toggle("open", !was);
+        });
+        seqMarkers.push(new (ml().Marker)({ element: node, anchor: "center" }).setLngLat(toLngLat(m.at)).addTo(map));
+      });
+      setTimeout(declutterMarks, list.length * stagger + 450);
+    },
+    clearMarks() { seqMarkers.forEach((x) => x.remove()); seqMarkers.length = 0; },
     fitArr(n) {
       if (!map) return;
       const a = DB.arrs.find((x) => x.n === n);
@@ -236,6 +290,14 @@ export function create3D(el, { labels = true, onItemClick = null, onMapClick = n
     /** Tourne la carte de `deg` degrés (sens des aiguilles d'une montre si positif). */
     rotate(deg) { if (map) { orbiting = false; map.easeTo({ bearing: map.getBearing() + deg, duration: 400 }); } },
     north() { if (map) { orbiting = false; map.easeTo({ bearing: 0, duration: 500 }); } },
+    /** Incline (delta > 0) ou redresse (delta < 0) la carte, entre la vue à plat et l'inclinaison maximale. */
+    tilt(delta) {
+      if (!map) return;
+      orbiting = false;
+      map.easeTo({ pitch: Math.max(0, Math.min(MAX_TILT, map.getPitch() + delta)), duration: 400 });
+    },
+    get pitch() { return map ? map.getPitch() : 0; },
+    maxTilt: MAX_TILT,
     /** Bascule vue à plat / inclinée ; renvoie true si la vue est maintenant à plat. */
     toggleFlat() {
       if (!map) return false;

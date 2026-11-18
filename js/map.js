@@ -14,6 +14,18 @@ const ATTR_GL = '<a href="https://openfreemap.org">OpenFreeMap</a> &copy; <a hre
 const ATTR_OSM = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>';
 const OSM_TILE = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
 export const PARIS_BOUNDS = [[48.8155, 2.2242], [48.9022, 2.4699]];
+const PARIS_CENTER = [48.8586, 2.3470];
+
+/** Nom court d'une porte pour la vue d'ensemble : « Porte de la Chapelle » -> « Chapelle ». */
+export function porteShort(name) {
+  return name.replace(/^Porte\s+(?:de\s+la\s+|de\s+l['’]|de\s+|d['’]|des\s+|du\s+)?/i, "");
+}
+/** Côté où placer l'étiquette d'une porte : vers l'extérieur de Paris. */
+function porteSide(pt) {
+  const dy = pt[0] - PARIS_CENTER[0], dx = (pt[1] - PARIS_CENTER[1]) * Math.cos((PARIS_CENTER[0] * Math.PI) / 180);
+  return Math.abs(dx) > Math.abs(dy) * 1.2 ? (dx > 0 ? "e" : "w") : dy > 0 ? "n" : "s";
+}
+const PORTE_TRY = { n: ["n", "e", "w"], s: ["s", "e", "w"], e: ["e", "n", "s"], w: ["w", "n", "s"] };
 
 /** Couleurs des tracés, choisies pour un fond clair. */
 export const STYLE_COL = { focus: "#1a73e8", good: "#188038", bad: "#d93025", hint: "#e37400" };
@@ -199,6 +211,31 @@ export function createMap(el, { labels = true, arrNumbers = true, arrFill = true
   }
   map.on("zoomend", () => !destroyed && declutter());
 
+  // étiquettes courtes des portes : celles qui en chevauchent une autre sont masquées (le zoom les révèle)
+  let porteRaf = 0;
+  function declutterPortes() {
+    porteRaf = 0;
+    if (destroyed) return;
+    const spans = [...el.querySelectorAll(".lbl-porte span")];
+    spans.forEach((sp) => sp.classList.remove("lbl-hide"));
+    const kept = [];
+    const hits = (r) => kept.some((k) => !(r.right < k.left - 3 || r.left > k.right + 3 || r.bottom < k.top - 1 || r.top > k.bottom + 1));
+    const setSide = (box, side) => { box.classList.remove("lbl-n", "lbl-s", "lbl-e", "lbl-w"); box.classList.add(`lbl-${side}`); };
+    for (const sp of spans) {
+      const box = sp.parentElement;
+      const first = box.dataset.side;
+      // côté extérieur d'abord, puis les côtés perpendiculaires ; masquée seulement si aucun ne convient
+      let placed = false;
+      for (const side of PORTE_TRY[first] || [first]) {
+        setSide(box, side);
+        const r = sp.getBoundingClientRect();
+        if (!hits(r)) { kept.push(r); placed = true; break; }
+      }
+      if (!placed) { setSide(box, first); sp.classList.add("lbl-hide"); }
+    }
+  }
+  const queuePortes = () => { if (!porteRaf) porteRaf = requestAnimationFrame(declutterPortes); };
+
   function drawArrs(sel = null) {
     arrGroup.clearLayers();
     for (const a of DB.arrs) {
@@ -276,16 +313,21 @@ export function createMap(el, { labels = true, arrNumbers = true, arrFill = true
       const g = L.featureGroup(layers).addTo(group);
       // l'effet de tracé repose sur un pointillé géant : on le retire une fois l'animation finie
       if (animate) setTimeout(() => layers.forEach((l) => l._path?.classList.remove("draw-anim")), 2400);
-      if (label) api.label(it, style);
+      if (label) api.label(it, style, { short: label === "short" });
       return g;
     },
-    label(it, style = "normal") {
+    /** Étiquette d'un élément ; `short` (portes, vue d'ensemble) : nom court placé vers l'extérieur. */
+    label(it, style = "normal", { short = false } = {}) {
       const pinned = it.isLandmark || it.isPlace || !it.geom.lines.length;
-      L.marker(it.point, {
+      const side = porteSide(it.point);
+      const cls = short ? `lbl lbl-porte lbl-${side}` : `lbl lbl-${style}${pinned ? " lbl-pin" : ""}`;
+      const mk = L.marker(it.point, {
         interactive: false,
-        icon: L.divIcon({ className: `lbl lbl-${style}${pinned ? " lbl-pin" : ""}`, html: `<span>${esc(it.name)}</span>`, iconSize: null }),
-        zIndexOffset: 2000,
+        icon: L.divIcon({ className: cls, html: `<span>${esc(short ? porteShort(it.name) : it.name)}</span>`, iconSize: null }),
+        zIndexOffset: short ? 1800 : 2000,
+        title: short ? it.name : "",
       }).addTo(labelsLayer);
+      if (short) { const e = mk.getElement(); if (e) e.dataset.side = side; queuePortes(); }
     },
     /**
      * Pastilles d'une suite de croisements : [{ at, label, n?, style? }].
@@ -329,9 +371,12 @@ export function createMap(el, { labels = true, arrNumbers = true, arrFill = true
       const a = DB.arrs.find((x) => x.n === n);
       map.flyToBounds(L.latLngBounds(a.rings[0]), { padding: [20, 20], duration: 0.6 });
     },
-    fitParis() {
+    /** Vue d'ensemble ; `inset.top` réserve la place de la barre d'outils pour que les portes du nord restent visibles. */
+    fitParis({ inset = null } = {}) {
       if (destroyed) return;
-      map.fitBounds(PARIS_BOUNDS, { padding: [10, 10] });
+      map.invalidateSize();
+      const top = inset?.top || 0;
+      map.fitBounds(PARIS_BOUNDS, { paddingTopLeft: [10, 10 + top], paddingBottomRight: [10, 10] });
     },
     highlightArr(n) {
       drawArrs(n);
