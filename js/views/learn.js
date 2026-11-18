@@ -7,7 +7,7 @@ import { createMap, GL_OK } from "../map.js";
 import { create3D } from "../map3d.js";
 import { orientHTML, wireOrient } from "../orient.js";
 import { ficheHTML } from "../fiche.js";
-import { seqMarks } from "../questions.js";
+import { seqMarks, porteRing } from "../questions.js";
 import * as store from "../store.js";
 import { esc, toast } from "../util.js";
 
@@ -67,7 +67,8 @@ export default function learn(root, params, [levelId]) {
     m3.select(view.focus || null);
     if (view.marks?.length) m3.marks(view.marks, { stagger: 120 });
     else m3.clearMarks();
-    if (view.focus) m3.fly(view.focus);
+    if (view.fit) m3.fitItems(view.fit);
+    else if (view.focus) m3.fly(view.focus);
     else m3.fitItems(view.ids.map(item));
   }
   async function set3D(on) {
@@ -116,9 +117,19 @@ export default function learn(root, params, [levelId]) {
     // la carte 2D cachée pendant la 3D ne peut pas se cadrer : elle est redessinée au retour en 2D
     redraw2d = () => draw2d(it, marks, isChain);
     if (!m3) redraw2d();
-    const around = isChain ? [] : [...store.palierItems(level, palierOf(ids.indexOf(it.id))), ...it.links];
-    view = { ids: [...new Set([it.id, ...around])], focus: it, marks: isChain ? marks.map((x, k) => ({ ...x, n: k + 1 })) : null };
+    const nb = neighbours(it);
+    const around = isChain ? [] : [...store.palierItems(level, palierOf(ids.indexOf(it.id))), ...it.links, ...nb.map((x) => x.id)];
+    view = { ids: [...new Set([it.id, ...around])], focus: it, fit: nb.length ? [it, ...nb] : null, marks: isChain ? marks.map((x, k) => ({ ...x, n: k + 1 })) : null };
     apply3d();
+  }
+
+  /** Portes : la précédente et la suivante sur le périphérique, pour situer la porte. */
+  function neighbours(it) {
+    if (!it.isPorte) return [];
+    const ring = porteRing();
+    const j = ring.findIndex((x) => x.id === it.id);
+    if (j < 0) return [];
+    return [ring[(j - 1 + ring.length) % ring.length], ring[(j + 1) % ring.length]];
   }
 
   function draw2d(it, marks, isChain) {
@@ -132,7 +143,10 @@ export default function learn(root, params, [levelId]) {
     }
     m.draw(it, { style: "focus", label: !isChain, animate: isChain });
     if (isChain) m.marks(marks.map((x, k) => ({ ...x, n: k + 1, style: "hint" })), { stagger: Math.min(450, 2600 / marks.length) });
-    m.fit([it], { pad: it.isWay ? 40 : it.isPorte ? 220 : 160, maxZoom: 16 });
+    const nb = neighbours(it);
+    for (const x of nb) m.draw(x, { style: "normal", label: true });
+    if (nb.length) m.fit([it, ...nb], { pad: 50, maxZoom: 15.5 });
+    else m.fit([it], { pad: it.isWay ? 40 : 160, maxZoom: 16 });
   }
 
   function show() {

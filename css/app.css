@@ -335,12 +335,20 @@ details summary { cursor: pointer; color: var(--mut); font-size: .88rem; padding
 .lbl span { font-size: 12.5px; font-weight: 600; color: #202124; padding: 3px 8px; border-radius: 6px; background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, .35); }
 .lbl-pin span { transform: translate(-50%, 6px); } /* sous l'épingle */
 /* portes en vue d'ensemble : nom court, posé vers l'extérieur du périphérique */
-.lbl-porte span { font-size: 11px; font-weight: 700; color: #fff; background: #202124; padding: 2px 6px; border-radius: 4px; box-shadow: 0 1px 2px rgba(0, 0, 0, .3); }
+.lbl-porte span { font-size: 12px; font-weight: 700; color: #fff; background: #202124; padding: 2px 6px; border-radius: 4px; box-shadow: 0 1px 2px rgba(0, 0, 0, .3); }
 .lbl-porte.lbl-n span { transform: translate(-50%, calc(-100% - 34px)); }
 .lbl-porte.lbl-s span { transform: translate(-50%, 4px); }
 .lbl-porte.lbl-e span { transform: translate(13px, -26px); }
 .lbl-porte.lbl-w span { transform: translate(calc(-100% - 13px), -26px); }
 .lbl-porte span.lbl-hide { visibility: hidden; }
+/* vue d'ensemble (page Carte) : épingles réduites, portes un peu plus grandes, noms rapprochés */
+.far .mpin svg, .far .ppin svg { transform: scale(.42); transform-origin: 50% 100%; transition: transform .2s; }
+.far .mpin.cat-porte svg { transform: scale(.62); }
+.far .mpin.pulse svg { transform: none; }
+.far .lbl-porte.lbl-n span { transform: translate(-50%, calc(-100% - 25px)); }
+.far .lbl-porte.lbl-s span { transform: translate(-50%, 3px); }
+.far .lbl-porte.lbl-e span { transform: translate(9px, calc(-50% - 12px)); }
+.far .lbl-porte.lbl-w span { transform: translate(calc(-100% - 9px), calc(-50% - 12px)); }
 .lbl-focus span { color: #fff; background: #1a73e8; }
 .lbl-good span { color: #fff; background: #188038; }
 .lbl-bad span { color: #fff; background: #d93025; }

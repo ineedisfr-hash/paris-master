@@ -55,7 +55,7 @@ export default function explore(root, params) {
   </section>`;
 
   const $ = (s) => root.querySelector(s);
-  const m = createMap($("#emap"), { labels: pref.learn, arrNumbers: true, police: store.S.settings.police, photos: true });
+  const m = createMap($("#emap"), { labels: pref.learn, arrNumbers: true, police: store.S.settings.police, photos: true, farPins: true });
   m.refresh();
   let m3 = null;
   let selected = null;

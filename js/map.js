@@ -102,7 +102,7 @@ export function pinSVG(cat, color, s = 30) {
 function pinIcon(it, color, { big = false, pulse = false, muted = false } = {}) {
   const s = big ? 40 : 30;
   return L.divIcon({
-    className: `mpin${pulse ? " pulse" : ""}${muted ? " muted" : ""}`,
+    className: `mpin cat-${it.cat}${pulse ? " pulse" : ""}${muted ? " muted" : ""}`,
     iconSize: [s, s * 1.25],
     iconAnchor: [s / 2, s * 1.2],
     html: pinSVG(it.cat, color, s),
@@ -111,7 +111,7 @@ function pinIcon(it, color, { big = false, pulse = false, muted = false } = {}) 
 
 // ------------------------------------------------------------------ carte
 
-export function createMap(el, { labels = true, arrNumbers = true, arrFill = true, police = false, photos = false } = {}) {
+export function createMap(el, { labels = true, arrNumbers = true, arrFill = true, police = false, photos = false, farPins = false } = {}) {
   const map = L.map(el, {
     zoomControl: false,
     attributionControl: true,
@@ -210,6 +210,12 @@ export function createMap(el, { labels = true, arrNumbers = true, arrFill = true
     }
   }
   map.on("zoomend", () => !destroyed && declutter());
+
+  // vue d'ensemble : épingles réduites, pour que les noms des portes restent lisibles
+  const FAR_ZOOM = 12;
+  const updateFar = () => { if (farPins && !destroyed) el.classList.toggle("far", map.getZoom() < FAR_ZOOM); };
+  map.on("zoomend", updateFar);
+  updateFar();
 
   // étiquettes courtes des portes : celles qui en chevauchent une autre sont masquées (le zoom les révèle)
   let porteRaf = 0;
@@ -377,6 +383,7 @@ export function createMap(el, { labels = true, arrNumbers = true, arrFill = true
       map.invalidateSize();
       const top = inset?.top || 0;
       map.fitBounds(PARIS_BOUNDS, { paddingTopLeft: [10, 10 + top], paddingBottomRight: [10, 10] });
+      updateFar();
     },
     highlightArr(n) {
       drawArrs(n);

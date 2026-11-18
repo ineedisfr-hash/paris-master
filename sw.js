@@ -1,6 +1,6 @@
 // Service worker : application et données disponibles hors connexion ;
 // les tuiles de fond de carte déjà vues sont gardées en cache (limité).
-const VERSION = "pm-v7";
+const VERSION = "pm-v8";
 const SHELL = [
   "./", "index.html", "manifest.webmanifest", "css/app.css", "data/paris.json", "data/context.json", "data/police.json",
   "vendor/leaflet/leaflet.js", "vendor/leaflet/leaflet.css",

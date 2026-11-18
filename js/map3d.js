@@ -76,13 +76,15 @@ export function create3D(el, { labels = true, onItemClick = null, onMapClick = n
       map.addLayer({ id: "pm-sel", type: "line", source: "pm-items", filter: ["==", ["get", "id"], ""], layout: { "line-cap": "round", "line-join": "round" }, paint: { "line-color": STYLE_COL.focus, "line-width": ["interpolate", ["linear"], ["zoom"], 11, 5, 16, 10] } });
       map.addLayer({ id: "pm-hit", type: "line", source: "pm-items", filter: ["==", ["get", "kind"], "line"], paint: { "line-color": "#000", "line-opacity": 0.001, "line-width": 24 } });
       map.addLayer({ id: "pm-arr-num", type: "symbol", source: "pm-arrpts", maxzoom: 14, layout: { "text-field": ["get", "label"], "text-font": ["Noto Sans Bold"], "text-size": 15 }, paint: { "text-color": ["get", "color"], "text-halo-color": "#fff", "text-halo-width": 2 } });
-      map.addLayer({ id: "pm-label", type: "symbol", source: "pm-items", filter: ["==", ["get", "kind"], "pt"], minzoom: 13.5,
+      map.addLayer({ id: "pm-label", type: "symbol", source: "pm-items", filter: ["all", ["==", ["get", "kind"], "pt"], ["!=", ["get", "cat"], "porte"]], minzoom: 13.5,
         layout: { "text-field": ["get", "name"], "text-font": ["Noto Sans Bold"], "text-size": 13, "text-offset": [0, 0.9], "text-anchor": "top", "text-optional": true, visibility: showLabels ? "visible" : "none" },
         paint: { "text-color": "#202124", "text-halo-color": "#fff", "text-halo-width": 2 } });
-      // portes : nom court en vue d'ensemble (les collisions sont gérées par MapLibre)
-      map.addLayer({ id: "pm-porte-label", type: "symbol", source: "pm-items", filter: ["all", ["==", ["get", "kind"], "pt"], ["==", ["get", "cat"], "porte"]], maxzoom: 13.5,
-        layout: { "text-field": ["get", "short"], "text-font": ["Noto Sans Bold"], "text-size": 12, "text-variable-anchor": ["top", "left", "right", "bottom"], "text-radial-offset": 0.8, "text-optional": true, visibility: showLabels ? "visible" : "none" },
-        paint: { "text-color": "#202124", "text-halo-color": "#fff", "text-halo-width": 2 } });
+      // portes : blanc sur fond sombre (comme leurs épingles), nom court de loin, nom complet de près ;
+      // prioritaires sur les noms du fond de carte (communes, quartiers)
+      map.addLayer({ id: "pm-porte-label", type: "symbol", source: "pm-items", filter: ["all", ["==", ["get", "kind"], "pt"], ["==", ["get", "cat"], "porte"]],
+        layout: { "text-field": ["step", ["zoom"], ["get", "short"], 14, ["get", "name"]], "text-font": ["Noto Sans Bold"], "text-size": ["interpolate", ["linear"], ["zoom"], 11, 13, 15, 15],
+          "text-variable-anchor": ["top", "left", "right", "bottom"], "text-radial-offset": 0.9, "text-optional": true, "symbol-sort-key": 0, visibility: showLabels ? "visible" : "none" },
+        paint: { "text-color": "#fff", "text-halo-color": "#202124", "text-halo-width": 3.5, "text-halo-blur": 0 } });
 
       for (const it of DB.items) {
         if (!(it.isLandmark || it.isPlace || !it.geom.lines.length)) continue;
@@ -185,7 +187,7 @@ export function create3D(el, { labels = true, onItemClick = null, onMapClick = n
     const f = (kind) => ["all", ["==", ["get", "kind"], kind], cat, arr, only];
     for (const id of ["pm-case", "pm-line", "pm-hit"]) map.setFilter(id, f("line"));
     for (const id of ["pm-poly", "pm-poly-line"]) map.setFilter(id, f("poly"));
-    map.setFilter("pm-label", f("pt"));
+    map.setFilter("pm-label", ["all", f("pt"), ["!=", ["get", "cat"], "porte"]]);
     map.setFilter("pm-porte-label", ["all", f("pt"), ["==", ["get", "cat"], "porte"]]);
     map.setFilter("pm-arr-sel", ["==", ["get", "n"], filt.arr ?? -1]);
     for (const { it, node } of markers) {
