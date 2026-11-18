@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Paris Master</title>
+  <meta name="description" content="Apprendre la topographie de Paris : grands axes, places, ponts, monuments et arrondissements, par la carte et le jeu.">
+  <meta name="theme-color" content="#0b0f14">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Paris Master">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="vendor/leaflet/leaflet.css">
+  <link rel="stylesheet" href="vendor/maplibre/maplibre-gl.css">
+  <link rel="stylesheet" href="css/app.css">
+</head>
+<body class="loading">
+  <header class="top">
+    <a class="brand" href="#/"><span class="logo" aria-hidden="true"></span>Paris <b>Master</b></a>
+    <a class="profile-btn" href="#/profil" data-nav="profil" aria-label="Profil"><i class="ic ic-user"></i><span>Profil</span></a>
+  </header>
+  <main id="view"><p class="boot">Chargement de la carte de Paris…</p></main>
+  <nav class="nav" aria-label="Navigation principale">
+    <a href="#/" data-nav="accueil"><i class="ic ic-home"></i>Accueil</a>
+    <a href="#/carte" data-nav="carte"><i class="ic ic-map"></i>Carte</a>
+    <a href="#/niveaux" data-nav="niveaux"><i class="ic ic-levels"></i>Niveaux</a>
+    <a href="#/jouer" data-nav="jouer"><i class="ic ic-play"></i>Jouer</a>
+    <a href="#/stats" data-nav="stats"><i class="ic ic-stats"></i>Stats</a>
+  </nav>
+  <script src="vendor/leaflet/leaflet.js"></script>
+  <script src="vendor/maplibre/maplibre-gl.js"></script>
+  <script src="vendor/maplibre/leaflet-maplibre-gl.js"></script>
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

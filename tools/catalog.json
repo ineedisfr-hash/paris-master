@@ -1,0 +1,962 @@
+{
+  "_doc": "Catalogue pédagogique. kind=voie : résolu dans la nomenclature officielle des voies de la Ville de Paris (champ 'official' si le nom officiel diffère du nom d'usage). kind=lieu : résolu via OpenStreetMap/Nominatim (champ 'q' = requête, 'osm' = identifiant forcé). complement=true : ajouté en plus de la liste de départ (ponts, quais). Toute coordonnée et tout arrondissement sont calculés par tools/build_data.py, jamais saisis à la main.",
+  "levels": [
+    {
+      "id": 0,
+      "title": "Le squelette de Paris",
+      "subtitle": "Les repères qui structurent toute la ville",
+      "arrondissements": [],
+      "items": [
+        {
+          "name": "Grands Boulevards",
+          "kind": "anneau",
+          "note": "Le premier anneau, rive droite : il suit l'ancienne enceinte de Charles V et Louis XIII, de la Madeleine à la Bastille.",
+          "members": [
+            "boulevard de la Madeleine",
+            "boulevard des Capucines",
+            "boulevard des Italiens",
+            "boulevard Montmartre",
+            "boulevard Poissonnière",
+            "boulevard de Bonne-Nouvelle",
+            "boulevard Saint-Denis",
+            "boulevard Saint-Martin",
+            "boulevard du Temple",
+            "boulevard des Filles du Calvaire",
+            "boulevard Beaumarchais"
+          ],
+          "seqDir": "de la Madeleine à la Bastille"
+        },
+        {
+          "name": "Anneau des anciennes barrières",
+          "kind": "anneau",
+          "note": "Le deuxième anneau suit l'ancien mur des Fermiers généraux. Au nord, le métro 2 le longe ; au sud, le métro 6.",
+          "members": [
+            "boulevard de Courcelles",
+            "boulevard des Batignolles",
+            "boulevard de Clichy",
+            "boulevard Marguerite de Rochechouart",
+            "boulevard de la Chapelle",
+            "boulevard de la Villette",
+            "boulevard de Belleville",
+            "boulevard de Ménilmontant",
+            "boulevard de Charonne",
+            "boulevard de Picpus",
+            "boulevard de Reuilly",
+            "boulevard de Bercy",
+            "boulevard Vincent Auriol",
+            "boulevard Auguste Blanqui",
+            "boulevard Saint-Jacques",
+            "boulevard Edgar Quinet",
+            "boulevard Pasteur",
+            "boulevard Garibaldi",
+            "boulevard de Grenelle"
+          ],
+          "seqDir": "dans le sens des aiguilles d'une montre, depuis le boulevard de Courcelles"
+        },
+        {
+          "name": "Boulevards des Maréchaux",
+          "kind": "anneau",
+          "note": "Le troisième anneau, juste à l'intérieur du périphérique : presque tous portent le nom d'un maréchal du Premier Empire.",
+          "members": [
+            "boulevard Gouvion-Saint-Cyr",
+            "boulevard Berthier",
+            "boulevard Bessières",
+            "boulevard Ney",
+            "boulevard Macdonald",
+            "boulevard Sérurier",
+            "boulevard Mortier",
+            "boulevard Davout",
+            "boulevard Soult",
+            "boulevard Poniatowski",
+            "boulevard Masséna",
+            "boulevard Kellermann",
+            "boulevard Jourdan",
+            "boulevard Brune",
+            "boulevard Lefebvre",
+            "boulevard Victor",
+            "boulevard Murat",
+            "boulevard Suchet",
+            "boulevard Lannes",
+            "boulevard de l'Amiral Bruix"
+          ],
+          "seqDir": "dans le sens des aiguilles d'une montre, depuis le boulevard Gouvion-Saint-Cyr"
+        },
+        {
+          "name": "Rue de Rivoli",
+          "kind": "voie"
+        },
+        {
+          "name": "Avenue des Champs-Élysées",
+          "kind": "voie"
+        },
+        {
+          "name": "Boulevard de Sébastopol",
+          "kind": "voie"
+        },
+        {
+          "name": "Boulevard Saint-Michel",
+          "kind": "voie"
+        },
+        {
+          "name": "Place Charles-de-Gaulle (Étoile)",
+          "kind": "voie",
+          "official": "place Charles de Gaulle",
+          "alias": [
+            "Place de l'Étoile"
+          ]
+        },
+        {
+          "name": "Place de la Concorde",
+          "kind": "voie"
+        },
+        {
+          "name": "Place de l'Opéra",
+          "kind": "voie"
+        },
+        {
+          "name": "Place de la République",
+          "kind": "voie"
+        },
+        {
+          "name": "Place de la Bastille",
+          "kind": "voie"
+        },
+        {
+          "name": "Place de la Nation",
+          "kind": "voie"
+        },
+        {
+          "name": "Place d'Italie",
+          "kind": "voie"
+        }
+      ],
+      "open": true
+    },
+    {
+      "id": 1,
+      "title": "Le centre de Paris",
+      "subtitle": "Du 1er au 9e arrondissement",
+      "arrondissements": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "items": [
+        {
+          "name": "Rue de Rivoli",
+          "kind": "voie"
+        },
+        {
+          "name": "Avenue des Champs-Élysées",
+          "kind": "voie"
+        },
+        {
+          "name": "Boulevard Haussmann",
+          "kind": "voie"
+        },
+        {
+          "name": "Boulevard Saint-Germain",
+          "kind": "voie"
+        },
+        {
+          "name": "Boulevard Saint-Michel",
+          "kind": "voie"
+        },
+        {
+          "name": "Rue de Rennes",
+          "kind": "voie"
+        },
+        {
+          "name": "Rue Saint-Honoré",
+          "kind": "voie"
+        },
+        {
+          "name": "Rue de la Paix",
+          "kind": "voie"
+        },
+        {
+          "name": "Boulevard de Sébastopol",
+          "kind": "voie"
+        },
+        {
+          "name": "Boulevard Saint-Denis",
+          "kind": "voie"
+        },
+        {
+          "name": "Place de la Concorde",
+          "kind": "voie"
+        },
+        {
+          "name": "Place Vendôme",
+          "kind": "voie"
+        },
+        {
+          "name": "Place de la République",
+          "kind": "voie"
+        },
+        {
+          "name": "Place de l'Opéra",
+          "kind": "voie"
+        },
+        {
+          "name": "Place de la Bastille",
+          "kind": "voie"
+        },
+        {
+          "name": "Place Charles-de-Gaulle (Étoile)",
+          "kind": "voie",
+          "official": "place Charles de Gaulle",
+          "alias": [
+            "Place de l'Étoile"
+          ]
+        },
+        {
+          "name": "Notre-Dame",
+          "kind": "lieu",
+          "category": "monument",
+          "q": "Cathédrale Notre-Dame de Paris"
+        },
+        {
+          "name": "Musée du Louvre",
+          "kind": "lieu",
+          "category": "monument",
+          "q": "Musée du Louvre"
+        },
+        {
+          "name": "Tour Eiffel",
+          "kind": "lieu",
+          "category": "monument",
+          "q": "Tour Eiffel"
+        },
+        {
+          "name": "Arc de Triomphe",
+          "kind": "lieu",
+          "category": "monument",
+          "q": "Arc de Triomphe de l'Étoile"
+        },
+        {
+          "name": "Panthéon",
+          "kind": "lieu",
+          "category": "monument",
+          "q": "Panthéon, Place du Panthéon"
+        },
+        {
+          "name": "Hôtel de Ville",
+          "kind": "lieu",
+          "category": "monument",
+          "q": "Hôtel de Ville, Place de l'Hôtel de Ville"
+        },
+        {
+          "name": "Invalides",
+          "kind": "lieu",
+          "category": "monument",
+          "q": "Hôtel des Invalides"
+        },
+        {
+          "name": "Pont Neuf",
+          "kind": "voie",
+          "complement": true
+        },
+        {
+          "name": "Pont des Arts",
+          "kind": "voie",
+          "complement": true
+        },
+        {
+          "name": "Pont de la Concorde",
+          "kind": "voie",
+          "complement": true
+        },
+        {
+          "name": "Pont Alexandre-III",
+          "kind": "voie",
+          "official": "pont Alexandre III",
+          "complement": true
+        },
+        {
+          "name": "Pont Saint-Michel",
+          "kind": "voie",
+          "complement": true
+        },
+        {
+          "name": "Quai du Louvre",
+          "kind": "voie",
+          "complement": true
+        },
+        {
+          "name": "Quai des Grands-Augustins",
+          "kind": "voie",
+          "complement": true
+        },
+        {
+          "name": "Quai d'Orsay",
+          "kind": "voie",
+          "complement": true
+        },
+        {
+          "name": "Quai de l'Hôtel-de-Ville",
+          "kind": "voie",
+          "complement": true
+        },
+        {
+          "name": "Quai Branly",
+          "kind": "voie",
+          "complement": true
+        }
+      ],
+      "open": true
+    },
+    {
+      "id": 2,
+      "title": "Le 10e arrondissement",
+      "subtitle": "Gares, canal et faubourgs",
+      "arrondissements": [
+        10
+      ],
+      "items": [
+        {
+          "name": "Boulevard de Magenta",
+          "kind": "voie"
+        },
+        {
+          "name": "Boulevard de Strasbourg",
+          "kind": "voie"
+        },
+        {
+          "name": "Boulevard de la Villette",
+          "kind": "voie"
+        },
+        {
+          "name": "Rue du Faubourg-Saint-Denis",
+          "kind": "voie"
+        },
+        {
+          "name": "Rue du Faubourg-Saint-Martin",
+          "kind": "voie"
+        },
+        {
+          "name": "Rue La Fayette",
+          "kind": "voie",
+          "alias": [
+            "Rue Lafayette"
+          ]
+        },
+        {
+          "name": "Place de la République",
+          "kind": "voie"
+        },
+        {
+          "name": "Gare du Nord",
+          "kind": "lieu",
+          "category": "gare",
+          "q": "Gare du Nord, Paris"
+        },
+        {
+          "name": "Gare de l'Est",
+          "kind": "lieu",
+          "category": "gare",
+          "q": "Gare de l'Est, Paris"
+        },
+        {
+          "name": "Canal Saint-Martin",
+          "kind": "lieu",
+          "category": "eau",
+          "q": "Canal Saint-Martin"
+        },
+        {
+          "name": "Quai de Valmy",
+          "kind": "voie",
+          "complement": true
+        },
+        {
+          "name": "Quai de Jemmapes",
+          "kind": "voie",
+          "complement": true
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Le 11e arrondissement",
+      "subtitle": "De la Bastille à la Nation",
+      "arrondissements": [
+        11
+      ],
+      "items": [
+        {
+          "name": "Boulevard Voltaire",
+          "kind": "voie"
+        },
+        {
+          "name": "Boulevard Richard-Lenoir",
+          "kind": "voie"
+        },
+        {
+          "name": "Boulevard de Ménilmontant",
+          "kind": "voie"
+        },
+        {
+          "name": "Rue de la Roquette",
+          "kind": "voie"
+        },
+        {
+          "name": "Rue Oberkampf",
+          "kind": "voie"
+        },
+        {
+          "name": "Rue de Charonne",
+          "kind": "voie"
+        },
+        {
+          "name": "Avenue de la République",
+          "kind": "voie"
+        },
+        {
+          "name": "Place de la Bastille",
+          "kind": "voie"
+        },
+        {
+          "name": "Place de la Nation",
+          "kind": "voie"
+        },
+        {
+          "name": "Place de la République",
+          "kind": "voie"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Le 12e arrondissement",
+      "subtitle": "Gares, Bercy et Vincennes",
+      "arrondissements": [
+        12
+      ],
+      "items": [
+        {
+          "name": "Avenue Daumesnil",
+          "kind": "voie"
+        },
+        {
+          "name": "Rue de Charenton",
+          "kind": "voie"
+        },
+        {
+          "name": "Boulevard Diderot",
+          "kind": "voie"
+        },
+        {
+          "name": "Boulevard de Bercy",
+          "kind": "voie"
+        },
+        {
+          "name": "Boulevard de Reuilly",
+          "kind": "voie"
+        },
+        {
+          "name": "Avenue de Saint-Mandé",
+          "kind": "voie"
+        },
+        {
+          "name": "Place de la Nation",
+          "kind": "voie"
+        },
+        {
+          "name": "Gare de Lyon",
+          "kind": "lieu",
+          "category": "gare",
+          "q": "Gare de Lyon, Paris"
+        },
+        {
+          "name": "Gare de Bercy",
+          "kind": "lieu",
+          "category": "gare",
+          "q": "Gare de Paris-Bercy"
+        },
+        {
+          "name": "Bois de Vincennes",
+          "kind": "lieu",
+          "category": "parc",
+          "q": "Bois de Vincennes"
+        },
+        {
+          "name": "Quai de la Rapée",
+          "kind": "voie",
+          "complement": true
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "Le 13e arrondissement",
+      "subtitle": "Autour de la place d'Italie",
+      "arrondissements": [
+        13
+      ],
+      "items": [
+        {
+          "name": "Avenue d'Italie",
+          "kind": "voie"
+        },
+        {
+          "name": "Avenue de Choisy",
+          "kind": "voie"
+        },
+        {
+          "name": "Avenue de la Porte d'Italie",
+          "kind": "voie"
+        },
+        {
+          "name": "Boulevard Vincent-Auriol",
+          "kind": "voie"
+        },
+        {
+          "name": "Boulevard Auguste-Blanqui",
+          "kind": "voie"
+        },
+        {
+          "name": "Boulevard de l'Hôpital",
+          "kind": "voie"
+        },
+        {
+          "name": "Rue de Tolbiac",
+          "kind": "voie"
+        },
+        {
+          "name": "Rue Bobillot",
+          "kind": "voie"
+        },
+        {
+          "name": "Place d'Italie",
+          "kind": "voie"
+        },
+        {
+          "name": "Bibliothèque François-Mitterrand",
+          "kind": "lieu",
+          "category": "monument",
+          "q": "Bibliothèque nationale de France François-Mitterrand"
+        },
+        {
+          "name": "Gare d'Austerlitz",
+          "kind": "lieu",
+          "category": "gare",
+          "q": "Gare d'Austerlitz, Paris"
+        },
+        {
+          "name": "Quai d'Austerlitz",
+          "kind": "voie",
+          "complement": true
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "title": "Le 18e arrondissement",
+      "subtitle": "Montmartre et les boulevards du nord",
+      "arrondissements": [
+        18
+      ],
+      "items": [
+        {
+          "name": "Boulevard Barbès",
+          "kind": "voie"
+        },
+        {
+          "name": "Boulevard Marguerite-de-Rochechouart",
+          "kind": "voie",
+          "alias": [
+            "Boulevard de Rochechouart"
+          ],
+          "note": "Ancien boulevard de Rochechouart, renommé par la Ville de Paris : on entend encore souvent l'ancien nom."
+        },
+        {
+          "name": "Boulevard Ornano",
+          "kind": "voie"
+        },
+        {
+          "name": "Boulevard Ney",
+          "kind": "voie"
+        },
+        {
+          "name": "Boulevard de Clichy",
+          "kind": "voie"
+        },
+        {
+          "name": "Rue Ordener",
+          "kind": "voie"
+        },
+        {
+          "name": "Rue Caulaincourt",
+          "kind": "voie"
+        },
+        {
+          "name": "Rue Lepic",
+          "kind": "voie"
+        },
+        {
+          "name": "Rue de Clignancourt",
+          "kind": "voie"
+        },
+        {
+          "name": "Place de Clichy",
+          "kind": "voie"
+        },
+        {
+          "name": "Place Jules-Joffrin",
+          "kind": "voie"
+        },
+        {
+          "name": "Sacré-Cœur",
+          "kind": "lieu",
+          "category": "monument",
+          "q": "Basilique du Sacré-Cœur de Montmartre"
+        },
+        {
+          "name": "Place du Tertre (Montmartre)",
+          "kind": "voie",
+          "official": "place du Tertre",
+          "note": "Montmartre est une butte et un quartier, pas un arrondissement : la place du Tertre est au sommet de la butte."
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "title": "Le 19e arrondissement",
+      "subtitle": "Canaux et grands parcs",
+      "arrondissements": [
+        19
+      ],
+      "items": [
+        {
+          "name": "Avenue Jean-Jaurès",
+          "kind": "voie"
+        },
+        {
+          "name": "Avenue de Flandre",
+          "kind": "voie"
+        },
+        {
+          "name": "Boulevard de la Villette",
+          "kind": "voie"
+        },
+        {
+          "name": "Boulevard Sérurier",
+          "kind": "voie"
+        },
+        {
+          "name": "Rue de Crimée",
+          "kind": "voie"
+        },
+        {
+          "name": "Rue de Belleville",
+          "kind": "voie"
+        },
+        {
+          "name": "Place des Fêtes",
+          "kind": "voie"
+        },
+        {
+          "name": "Parc des Buttes-Chaumont",
+          "kind": "lieu",
+          "category": "parc",
+          "q": "Parc des Buttes-Chaumont"
+        },
+        {
+          "name": "Parc de la Villette",
+          "kind": "lieu",
+          "category": "parc",
+          "q": "Parc de la Villette"
+        },
+        {
+          "name": "Canal de l'Ourcq",
+          "kind": "lieu",
+          "category": "eau",
+          "q": "Canal de l'Ourcq, Paris"
+        },
+        {
+          "name": "Bassin de la Villette",
+          "kind": "lieu",
+          "category": "eau",
+          "q": "Bassin de la Villette"
+        },
+        {
+          "name": "Quai de la Loire",
+          "kind": "voie",
+          "complement": true
+        },
+        {
+          "name": "Quai de la Seine",
+          "kind": "voie",
+          "complement": true
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "title": "Le 20e arrondissement",
+      "subtitle": "Belleville, Ménilmontant, Gambetta",
+      "arrondissements": [
+        20
+      ],
+      "items": [
+        {
+          "name": "Boulevard de Ménilmontant",
+          "kind": "voie"
+        },
+        {
+          "name": "Boulevard Davout",
+          "kind": "voie"
+        },
+        {
+          "name": "Boulevard Mortier",
+          "kind": "voie"
+        },
+        {
+          "name": "Rue de Belleville",
+          "kind": "voie"
+        },
+        {
+          "name": "Rue de Ménilmontant",
+          "kind": "voie"
+        },
+        {
+          "name": "Rue des Pyrénées",
+          "kind": "voie"
+        },
+        {
+          "name": "Rue de Bagnolet",
+          "kind": "voie"
+        },
+        {
+          "name": "Rue d'Avron",
+          "kind": "voie"
+        },
+        {
+          "name": "Place Gambetta",
+          "kind": "voie"
+        },
+        {
+          "name": "Cimetière du Père-Lachaise",
+          "kind": "lieu",
+          "category": "monument",
+          "q": "Cimetière du Père-Lachaise"
+        },
+        {
+          "name": "Porte de Montreuil",
+          "kind": "porte"
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "title": "Le 17e arrondissement",
+      "subtitle": "Des Ternes aux Batignolles",
+      "arrondissements": [
+        17
+      ],
+      "items": [
+        {
+          "name": "Avenue de Clichy",
+          "kind": "voie"
+        },
+        {
+          "name": "Avenue de Saint-Ouen",
+          "kind": "voie"
+        },
+        {
+          "name": "Boulevard Bessières",
+          "kind": "voie"
+        },
+        {
+          "name": "Boulevard Berthier",
+          "kind": "voie"
+        },
+        {
+          "name": "Boulevard Pereire",
+          "kind": "voie"
+        },
+        {
+          "name": "Avenue des Ternes",
+          "kind": "voie"
+        },
+        {
+          "name": "Rue de Courcelles",
+          "kind": "voie"
+        },
+        {
+          "name": "Rue de Lévis",
+          "kind": "voie"
+        },
+        {
+          "name": "Place de Clichy",
+          "kind": "voie"
+        },
+        {
+          "name": "Place des Ternes",
+          "kind": "voie"
+        },
+        {
+          "name": "Parc Monceau",
+          "kind": "lieu",
+          "category": "parc",
+          "q": "Parc Monceau",
+          "note": "Souvent associé au 17e, il est administrativement dans le 8e, en bordure du 17e."
+        },
+        {
+          "name": "Palais des Congrès",
+          "kind": "lieu",
+          "category": "monument",
+          "q": "Palais des Congrès de Paris"
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "title": "Les portes de Paris",
+      "subtitle": "Les portes du périphérique, dans l'ordre",
+      "arrondissements": [],
+      "open": true,
+      "_doc": "Chaque porte est vérifiée par tools/build_data.py (nomenclature officielle, échangeurs OSM du périphérique, ou Nominatim) et doit se trouver à moins de 800 m des boulevards des Maréchaux ; sinon elle est exclue et signalée.",
+      "items": [
+        {
+          "name": "Porte Maillot",
+          "kind": "porte"
+        },
+        {
+          "name": "Porte des Ternes",
+          "kind": "porte"
+        },
+        {
+          "name": "Porte de Champerret",
+          "kind": "porte"
+        },
+        {
+          "name": "Porte d'Asnières",
+          "kind": "porte"
+        },
+        {
+          "name": "Porte de Clichy",
+          "kind": "porte"
+        },
+        {
+          "name": "Porte de Saint-Ouen",
+          "kind": "porte"
+        },
+        {
+          "name": "Porte de Clignancourt",
+          "kind": "porte"
+        },
+        {
+          "name": "Porte de la Chapelle",
+          "kind": "porte"
+        },
+        {
+          "name": "Porte d'Aubervilliers",
+          "kind": "porte"
+        },
+        {
+          "name": "Porte de la Villette",
+          "kind": "porte"
+        },
+        {
+          "name": "Porte de Pantin",
+          "kind": "porte"
+        },
+        {
+          "name": "Porte du Pré-Saint-Gervais",
+          "kind": "porte"
+        },
+        {
+          "name": "Porte des Lilas",
+          "kind": "porte"
+        },
+        {
+          "name": "Porte de Bagnolet",
+          "kind": "porte"
+        },
+        {
+          "name": "Porte de Montreuil",
+          "kind": "porte"
+        },
+        {
+          "name": "Porte de Vincennes",
+          "kind": "porte"
+        },
+        {
+          "name": "Porte Dorée",
+          "kind": "porte"
+        },
+        {
+          "name": "Porte de Charenton",
+          "kind": "porte"
+        },
+        {
+          "name": "Porte de Bercy",
+          "kind": "porte"
+        },
+        {
+          "name": "Porte d'Ivry",
+          "kind": "porte"
+        },
+        {
+          "name": "Porte d'Italie",
+          "kind": "porte"
+        },
+        {
+          "name": "Porte de Gentilly",
+          "kind": "porte"
+        },
+        {
+          "name": "Porte d'Orléans",
+          "kind": "porte"
+        },
+        {
+          "name": "Porte de Châtillon",
+          "kind": "porte"
+        },
+        {
+          "name": "Porte de Vanves",
+          "kind": "porte"
+        },
+        {
+          "name": "Porte de Versailles",
+          "kind": "porte"
+        },
+        {
+          "name": "Porte de Sèvres",
+          "kind": "porte"
+        },
+        {
+          "name": "Porte de Saint-Cloud",
+          "kind": "porte"
+        },
+        {
+          "name": "Porte Molitor",
+          "kind": "porte"
+        },
+        {
+          "name": "Porte d'Auteuil",
+          "kind": "porte"
+        },
+        {
+          "name": "Porte de Passy",
+          "kind": "porte"
+        },
+        {
+          "name": "Porte de la Muette",
+          "kind": "porte"
+        },
+        {
+          "name": "Porte Dauphine",
+          "kind": "porte"
+        }
+      ]
+    }
+  ]
+}
